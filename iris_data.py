@@ -1,28 +1,39 @@
 import pandas as pd
 import tensorflow as tf
 
-TRAIN_URL = "http://ddwap.mah.se/af8207/newDL/smallTrain.csv"
-TEST_URL = "http://ddwap.mah.se/af8207/newDL/smallTest.csv"
+train_num = 21906
+test_num = 9381
 
-CSV_COLUMN_NAMES = ['Tempratur', 'Luftfuktighet',
-                    'Ljus', 'Lufttryck', 'AntalPersoner']
-SPECIES = ['En person', 'Två personer', 'Tre Personer']
+TRAIN_URL = 'merged-data-randomised-train.csv'
+TEST_URL = 'merged-data-randomised-test.csv'
 
-def maybe_download():
-    train_path = tf.keras.utils.get_file(TRAIN_URL.split('/')[-1], TRAIN_URL)
-    test_path = tf.keras.utils.get_file(TEST_URL.split('/')[-1], TEST_URL)
+CSV_COLUMN_NAMES = ['PersonCount', 'Temperature', 'Humidity',
+                    'Light', 'Pressure']
 
-    return train_path, test_path
-
-def load_data(y_name='AntalPersoner'):
+def load_data(y_name='PersonCount'):
     """Returns the iris dataset as (train_x, train_y), (test_x, test_y)."""
-    train_path, test_path = maybe_download()
+    train_path = TRAIN_URL
+    test_path = TEST_URL
 
     train = pd.read_csv(train_path, names=CSV_COLUMN_NAMES, header=0)
     train_x, train_y = train, train.pop(y_name)
 
     test = pd.read_csv(test_path, names=CSV_COLUMN_NAMES, header=0)
     test_x, test_y = test, test.pop(y_name)
+
+    print("Dataset train length X::", len(train_x))
+    print("Dataset train shape X::", train_x.shape)
+    print("Dataset train length Y::", len(train_y))
+    print("Dataset train shape Y::", train_y.shape)
+
+    print("Dataset test length X::", len(test_x))
+    print("Dataset test shape X::", test_x.shape)
+    print("Dataset test length Y::", len(test_y))
+    print("Dataset test shape Y::", test_y.shape)
+
+    print("train_x, train_y::", train_x, train_y)
+
+    print("train_y, test_y::", test_x, test_y)
 
     return (train_x, train_y), (test_x, test_y)
 
@@ -64,7 +75,7 @@ def eval_input_fn(features, labels, batch_size):
 
 # `tf.parse_csv` sets the types of the outputs to match the examples given in
 #     the `record_defaults` argument.
-CSV_TYPES = [[0.0], [0.0], [0.0], [0.0], [0]]
+CSV_TYPES = [[0.0], [0.0], [0.0], [0.0]]
 
 def _parse_line(line):
     # Decode the line into its fields
@@ -74,7 +85,7 @@ def _parse_line(line):
     features = dict(zip(CSV_COLUMN_NAMES, fields))
 
     # Separate the label from the features
-    label = features.pop('AntalPersoner')
+    label = features.pop('PersonCount')
 
     return features, label
 

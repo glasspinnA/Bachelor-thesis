@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import argparse
 import tensorflow as tf
+import numpy as np
 
 import iris_data
 
@@ -37,6 +38,13 @@ def main(argv):
     my_feature_columns = []
     for key in train_x.keys():
         my_feature_columns.append(tf.feature_column.numeric_column(key=key))
+        print(key)
+
+    uniqueTrain = set()
+    for l in train_y:
+        uniqueTrain.add(str(l))
+    uniqueTrain = list(uniqueTrain)
+    print(len(uniqueTrain))
 
     # Build 2 hidden layer DNN with 10, 10 units respectively.
     classifier = tf.estimator.DNNClassifier(
@@ -44,7 +52,8 @@ def main(argv):
         # Two hidden layers of 10 nodes each.
         hidden_units=[100, 100, 50, 10],
         # The model must choose between 3 classes.
-        n_classes=3)
+        n_classes=19)
+        #label_vocabulary=uniqueTrain)
 
     # Train the Model.
     classifier.train(
@@ -60,27 +69,27 @@ def main(argv):
     print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
 
     # Generate predictions from the model
-    expected = ['En Person', 'Två Personer', 'Tre Personer']
-    predict_x = {
-        'Tempratur': [50.1, 5.9, 6.9],
-        'Luftfuktighet': [3.3, 3.0, 3.1],
-        'Ljus': [1.7, 4.2, 5.4],
-        'Lufttryck': [0.5, 100.5, 2.1],
-    }
+    #expected = ['En Person', 'Två Personer', 'Tre Personer']
+    #predict_x = {
+    #    'Tempratur': [50.1, 5.9, 6.9],
+    #    'Luftfuktighet': [3.3, 3.0, 3.1],
+    #    'Ljus': [1.7, 4.2, 5.4],
+    #    'Lufttryck': [0.5, 100.5, 2.1],
+    #}
 
-    predictions = classifier.predict(
-        input_fn=lambda:iris_data.eval_input_fn(predict_x,
-                                                labels=None,
-                                                batch_size=args.batch_size))
+    #predictions = classifier.predict(
+    #    input_fn=lambda:iris_data.eval_input_fn(predict_x,
+    #                                            labels=None,
+    #                                            batch_size=args.batch_size))
 
-    for pred_dict, expec in zip(predictions, expected):
-        template = ('\nPrediction is "{}" ({:.1f}%), expected "{}"')
+    #for pred_dict, expec in zip(predictions, expected):
+    #    template = ('\nPrediction is "{}" ({:.1f}%), expected "{}"')
 
-        class_id = pred_dict['class_ids'][0]
-        probability = pred_dict['probabilities'][class_id]
+    #    class_id = pred_dict['class_ids'][0]
+    #    probability = pred_dict['probabilities'][class_id]
 
-        print(template.format(iris_data.SPECIES[class_id],
-                              100 * probability, expec))
+    #    print(template.format(iris_data.SPECIES[class_id],
+    #                          100 * probability, expec))
 
 
 if __name__ == '__main__':
